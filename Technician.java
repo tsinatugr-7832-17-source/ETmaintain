@@ -28,7 +28,6 @@ public class Technician {
  	    return new ArrayList<>(assignedOrders);
     }
 
-    // Business logic
     public void assignOrder(WorkOrder order) {
         assignedOrders.add(order);
     }
@@ -42,5 +41,6 @@ public class Technician {
         return "Technician: " + name + " | Skill: " + skill + " | Orders: " + assignedOrders.size();
     }
  }
+
 
 
