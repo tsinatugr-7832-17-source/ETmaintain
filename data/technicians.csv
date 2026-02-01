@@ -1,8 +1,7 @@
-Kaleb,Electrical
-Michael,Network
-Sara,Plumbing
-Meron,HVAC
-Bethel,IT Support
-Biruk,Carpentry
-Noah,Fire Safety
-Abel,Maintenance
+id,name,skill
+1,John,Plumbing
+2,Mike,Networking
+3,Sara,Electrical
+4,Alice,HVAC
+5,Bob,Carpentry
+6,Linda,Painting
