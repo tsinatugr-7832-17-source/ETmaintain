@@ -1,46 +1,25 @@
-package com.etmaintain.models;
-import java.util.ArrayList;
+package facilitymaintenance;
+
 import java.util.List;
-import com.etmaintain.models.WorkOrder;
 
-public class Technician {
-    private String name;
-    private String skill;
-    private List<WorkOrder> assignedOrders;
-    public Technician(String name, String skill) {
-        this.name = name;
-        this.skill = skill;
-        this.assignedOrders = new ArrayList<>();
-    }
-    public String getName() { 
-    	return name;
-    }
-    public void setName(String name) { 
-	    this.name = name;
-    }
-    public String getSkill() {
- 	    return skill;
-    }
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-    public List<WorkOrder> getAssignedOrders() {
- 	    return new ArrayList<>(assignedOrders);
-    }
+public class Technician extends User {
 
-    public void assignOrder(WorkOrder order) {
-        assignedOrders.add(order);
-    }
-
-    public void removeOrder(WorkOrder order) {
-        assignedOrders.remove(order);
+    public Technician(String name) {
+        super(name);
     }
 
     @Override
-    public String toString() {
-        return "Technician: " + name + " | Skill: " + skill + " | Orders: " + assignedOrders.size();
+    public String getRole() {
+        String technician = "Technician";
+        return "Technician";
     }
- }
 
-
-
+    public void markMyWorkDone(List<WorkOrder> orders) {
+        for (WorkOrder order : orders) {
+            if (order.getTechnician().equals(name)
+                    && order.getStatus() == WorkOrder.Status.PENDING) {
+                order.markDone();
+            }
+        }
+    }
+}
