@@ -1,0 +1,11 @@
+id,issue,facility,status,priority,technicianName
+1,Electrical Fault,Building A,PENDING,HIGH,
+2,Water Leak,Building B,ASSIGNED,MEDIUM,John
+3,Network Issue,Lab 1,COMPLETED,CRITICAL,Mike
+4,Plumbing Issue,Building C,PENDING,LOW,
+5,Heating Problem,Building D,ASSIGNED,HIGH,Sara
+6,Air Conditioning,Lab 2,PENDING,MEDIUM,
+7,Computer Repair,Office 1,ASSIGNED,HIGH,Mike
+8,Lighting Issue,Building A,COMPLETED,LOW,John
+9,Door Lock Issue,Building B,PENDING,MEDIUM,
+10,Fire Alarm Fault,Building D,ASSIGNED,CRITICAL,Sara
