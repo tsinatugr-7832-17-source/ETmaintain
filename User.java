@@ -2,16 +2,11 @@ package facilitymaintenance;
 
 public abstract class User {
 
-    protected String name;
+    private String name;
 
-    public User(String name) {
-        this.name = name;
-    }
+    public User(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
-    // abstract behavior (forces subclasses to implement)
     public abstract String getRole();
 }

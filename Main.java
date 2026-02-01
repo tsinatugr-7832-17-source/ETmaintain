@@ -8,126 +8,109 @@ import java.util.List;
 
 public class Main {
 
-    private static List<WorkOrder> orders = new ArrayList<>();
-    private static Admin admin = new Admin("System Admin");
-
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
+        List<WorkOrder> workOrders = loadData();
 
-        // ---------- LOAD DATA (IO) ----------
-        try (ObjectInputStream ois =
-                     new ObjectInputStream(new FileInputStream("workorders.dat"))) {
-            orders = (List<WorkOrder>) ois.readObject();
-        } catch (Exception e) {
-            System.out.println("No saved data found. Starting new.");
+        // Role selection
+        String[] roles = {"Admin","Technician"};
+        String role = (String) JOptionPane.showInputDialog(null,"Select Role","Login",
+                JOptionPane.PLAIN_MESSAGE,null,roles,roles[0]);
+        if(role==null) return;
+
+        String name = JOptionPane.showInputDialog("Enter Name:");
+        if(name==null||name.isBlank()) return;
+
+        Admin admin=null;
+        Technician tech=null;
+        User user;
+
+        if(role.equals("Admin")) {
+            admin = new Admin(name);
+            user = admin;
+        } else {
+            tech = new Technician(name);
+            user = tech;
         }
 
-        // ---------- PRELOAD SAMPLE DATA ----------
-        if (orders.isEmpty()) {
-            admin.addWorkOrder(orders, new WorkOrder(1, "Fix broken AC"));
-            admin.addWorkOrder(orders, new WorkOrder(2, "Repair leaking pipe"));
-            admin.addWorkOrder(orders, new WorkOrder(3, "Replace light bulbs"));
+        JOptionPane.showMessageDialog(null,"Welcome "+user.getRole()+": "+name);
 
-            admin.assignTechnician(orders.get(0), "Alice");
-            admin.assignTechnician(orders.get(1), "Bob");
-            admin.assignTechnician(orders.get(2), "Charlie");
+        // Sample data
+        if(workOrders.isEmpty() && admin!=null) {
+            admin.addWorkOrder(workOrders,new WorkOrder("Fix AC","Room 101"));
+            admin.addWorkOrder(workOrders,new WorkOrder("Repair Light","Lab 3"));
+            admin.addWorkOrder(workOrders,new WorkOrder("Water Leak","Bathroom A"));
         }
 
-        // ---------- SWING UI ----------
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Facility Maintenance System");
-            frame.setSize(550, 450);
+        // Make final for lambda
+        final Admin finalAdmin=admin;
+        final Technician finalTech=tech;
+        final List<WorkOrder> finalOrders=workOrders;
+
+        SwingUtilities.invokeLater(()->{
+            JFrame frame=new JFrame("ETmaintain");
+            frame.setSize(550,450);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLocationRelativeTo(null);
 
-            JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15));
-            panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            JPanel panel=new JPanel(new GridLayout(6,1,15,15));
+            panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
             frame.add(panel);
 
-            JButton addBtn = createButton("Add Work Order");
-            JButton assignBtn = createButton("Assign Technician");
-            JButton doneBtn = createButton("Technician Mark Done");
-            JButton dashboardBtn = createButton("View Dashboard");
-            JButton reportBtn = createButton("Generate Report");
-            JButton exitBtn = createButton("Exit");
+            JButton addBtn=createButton("Add Work Order",Color.BLUE);
+            JButton assignBtn=createButton("Assign Technician",Color.MAGENTA);
+            JButton doneBtn=createButton("Mark My Work Done",Color.GREEN);
+            JButton dashBtn=createButton("View Dashboard",Color.ORANGE);
+            JButton reportBtn=createButton("Generate Report",Color.CYAN);
+            JButton exitBtn=createButton("Exit",Color.RED);
 
             panel.add(addBtn);
             panel.add(assignBtn);
             panel.add(doneBtn);
-            panel.add(dashboardBtn);
+            panel.add(dashBtn);
             panel.add(reportBtn);
             panel.add(exitBtn);
 
-            // ---------- BUTTON ACTIONS ----------
-
-            // Add Work Order
-            addBtn.addActionListener(e -> {
-                String desc = JOptionPane.showInputDialog(frame,
-                        "Enter Work Order Description:");
-                if (desc != null && !desc.isBlank()) {
-                    int id = orders.size() + 1;
-                    admin.addWorkOrder(orders, new WorkOrder(id, desc));
-                    JOptionPane.showMessageDialog(frame, "Work Order Added");
+            addBtn.addActionListener(e->{
+                if(finalAdmin==null){ JOptionPane.showMessageDialog(frame,"Only Admin can add work orders!"); return; }
+                String title=JOptionPane.showInputDialog(frame,"Work Order Title:");
+                String loc=JOptionPane.showInputDialog(frame,"Location:");
+                if(title!=null&&!title.isBlank() && loc!=null&&!loc.isBlank()){
+                    finalAdmin.addWorkOrder(finalOrders,new WorkOrder(title,loc));
+                    JOptionPane.showMessageDialog(frame,"Work Order Added!");
                 }
             });
 
-            // Assign Technician
-            assignBtn.addActionListener(e -> {
-                try {
-                    int id = Integer.parseInt(
-                            JOptionPane.showInputDialog(frame, "Enter Work Order ID"));
-                    String tech =
-                            JOptionPane.showInputDialog(frame, "Enter Technician Name");
-
-                    WorkOrder order = orders.stream()
-                            .filter(o -> o.getId() == id)
-                            .findFirst()
-                            .orElse(null);
-
-                    if (order != null) {
-                        admin.assignTechnician(order, tech);
-                        JOptionPane.showMessageDialog(frame, "Technician Assigned");
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Work Order Not Found");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, "Invalid Input");
+            assignBtn.addActionListener(e->{
+                if(finalAdmin==null){ JOptionPane.showMessageDialog(frame,"Only Admin can assign technicians!"); return; }
+                if(finalOrders.isEmpty()){ JOptionPane.showMessageDialog(frame,"No Work Orders available."); return; }
+                String[] ids= finalOrders.stream().map(w->w.getId()+"").toArray(String[]::new);
+                String selected=(String)JOptionPane.showInputDialog(frame,"Select Work Order ID:","Assign Technician",JOptionPane.PLAIN_MESSAGE,null,ids,ids[0]);
+                if(selected==null) return;
+                int id=Integer.parseInt(selected);
+                WorkOrder wo= finalOrders.stream().filter(w->w.getId()==id).findFirst().orElse(null);
+                if(wo==null) return;
+                String techName=JOptionPane.showInputDialog(frame,"Enter Technician Name:");
+                if(techName!=null&&!techName.isBlank()){
+                    finalAdmin.assignTechnician(wo,techName);
+                    JOptionPane.showMessageDialog(frame,"Technician Assigned!");
                 }
             });
 
-            // Technician Mark Done (POLYMORPHISM)
-            doneBtn.addActionListener(e -> {
-                String techName =
-                        JOptionPane.showInputDialog(frame, "Enter Technician Name");
-
-                if (techName != null && !techName.isBlank()) {
-                    User user = new Technician(techName); // polymorphism
-                    ((Technician) user).markMyWorkDone(orders);
-                    JOptionPane.showMessageDialog(frame, "Work Orders Updated");
-                }
+            doneBtn.addActionListener(e->{
+                if(finalTech==null){ JOptionPane.showMessageDialog(frame,"Only Technicians can mark work done!"); return; }
+                finalTech.markMyWorkDone(finalOrders);
+                JOptionPane.showMessageDialog(frame,"Work Orders Updated!");
             });
 
-            // Dashboard
-            dashboardBtn.addActionListener(e ->
-                    new StyledDashboard(orders));
+            dashBtn.addActionListener(e->new Dashboard(finalOrders));
 
-            // Report
-            reportBtn.addActionListener(e -> {
-                Report report = new Report();
-                report.generateReport(orders, "reports/report.txt");
-                JOptionPane.showMessageDialog(frame,
-                        "Report Generated in reports/report.txt");
+            reportBtn.addActionListener(e->{
+                ReportGenerator.generate(finalOrders);
+                JOptionPane.showMessageDialog(frame,"Report Generated: report.txt");
             });
 
-            // Exit + Save
-            exitBtn.addActionListener(e -> {
-                try (ObjectOutputStream oos =
-                             new ObjectOutputStream(
-                                     new FileOutputStream("workorders.dat"))) {
-                    oos.writeObject(orders);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+            exitBtn.addActionListener(e->{
+                saveData(finalOrders);
                 frame.dispose();
             });
 
@@ -135,11 +118,26 @@ public class Main {
         });
     }
 
-    // ---------- BUTTON STYLE ----------
-    private static JButton createButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 16));
+    private static JButton createButton(String text, Color color){
+        JButton btn=new JButton(text);
+        btn.setFont(new Font("Arial",Font.BOLD,16));
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setOpaque(true);
+        btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         return btn;
+    }
+
+    private static List<WorkOrder> loadData(){
+        try(ObjectInputStream ois=new ObjectInputStream(new FileInputStream("workorders.dat"))){
+            return (List<WorkOrder>) ois.readObject();
+        } catch (Exception e){ return new ArrayList<>(); }
+    }
+
+    private static void saveData(List<WorkOrder> orders){
+        try(ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream("workorders.dat"))){
+            oos.writeObject(orders);
+        } catch (Exception e){ e.printStackTrace(); }
     }
 }

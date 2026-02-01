@@ -6,62 +6,43 @@ public class WorkOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // ---------- ENCAPSULATED FIELDS ----------
+    private static int counter = 1; // auto-ID generator
+
     private int id;
-    private String description;
+    private String title;
+    private String location;
     private String technician;
     private Status status;
 
-    // ---------- ENUM (Better than String) ----------
-    public enum Status {
-        PENDING,
-        DONE
-    }
+    public enum Status { PENDING, ASSIGNED, DONE }
 
-    // ---------- CONSTRUCTOR ----------
-    public WorkOrder(int id, String description) {
-        this.id = id;
-        this.description = description;
+    public WorkOrder(String title, String location) {
+        this.id = counter++;
+        this.title = title;
+        this.location = location;
         this.technician = "Unassigned";
         this.status = Status.PENDING;
     }
 
-    // ---------- GETTERS (NO DIRECT FIELD ACCESS) ----------
-    public int getId() {
-        return id;
-    }
+    // GETTERS
+    public int getId() { return id; }
+    public String getTitle() { return title; }
+    public String getLocation() { return location; }
+    public String getTechnician() { return technician; }
+    public Status getStatus() { return status; }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public String getTechnician() {
-        return technician;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    // ---------- BEHAVIOR METHODS ----------
-    // Encapsulation: state changes only via methods
-
-    public void assignTechnician(String technician) {
-        if (technician != null && !technician.isBlank()) {
-            this.technician = technician;
+    // METHODS
+    public void assignTechnician(String tech) {
+        if (tech != null && !tech.isBlank()) {
+            this.technician = tech;
+            this.status = Status.ASSIGNED;
         }
     }
 
-    public void markDone() {
-        this.status = Status.DONE;
-    }
+    public void markDone() { this.status = Status.DONE; }
 
-    // ---------- OPTIONAL (Nice for Dashboard / Report) ----------
     @Override
     public String toString() {
-        return "ID: " + id +
-                ", Description: " + description +
-                ", Technician: " + technician +
-                ", Status: " + status;
+        return id + ": " + title + " - " + location + " - " + status;
     }
 }
