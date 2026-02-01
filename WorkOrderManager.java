@@ -1,7 +1,7 @@
 package com.etmaintain.managers;
 
-import com.etmaintain.models.WorkOrder;
-import com.etmaintain.models.WorkOrderStatus;
+import facilitymaintenance.WorkOrder;
+import com.etmaintain.managers.WorkOrderOperations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class WorkOrderManager implements WorkOrderOperations {
     }
 
     @Override
-    public List<WorkOrder> getWorkOrdersByStatus(WorkOrderStatus status) {
+    public List<WorkOrder> getWorkOrdersByStatus(WorkOrder.Status status) {
         List<WorkOrder> filteredList = new ArrayList<>();
         for (WorkOrder wo : workOrders) {
             if (wo.getStatus() == status) {
