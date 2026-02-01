@@ -17,4 +17,4 @@ CSV Files
 
 - technicians.csv
 
-  Columns: name, skill
+  Columns: id, name, skill
